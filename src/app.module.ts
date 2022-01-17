@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AccountEntity } from './accounts/models/account.entity';
 import { AccountsModule } from './accounts/accounts.module';
 import { EventsModule } from './events/events.module';
+import { RedisModule } from '@liaoliaots/nestjs-redis';
 
 @Module({
   imports: [
@@ -18,8 +19,15 @@ import { EventsModule } from './events/events.module';
       entities: [AccountEntity],
       synchronize: true,
     }),
-    AccountsModule,
     EventsModule.forRoot(),
+    RedisModule.forRoot({
+      closeClient: true,
+      config: {
+        host: 'localhost',
+        port: 6379,
+      }
+    }),
+    AccountsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

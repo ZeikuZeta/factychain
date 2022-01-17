@@ -3,6 +3,7 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { CreateAccountCommand } from "./commands/create-account.command";
+import { RebuildAccountsCommand } from "./commands/rebuild-accounts.command";
 import { SendMoneyCommand } from "./commands/send-money.command";
 import { CreateAccountDto } from "./dto/create-account.dto";
 import { CreateTransactionDto } from "./dto/create-transaction.dto";
@@ -44,5 +45,10 @@ export class AccountsController {
     @Post('transactions')
     async createTransaction(@Body() dto: CreateTransactionDto) {
         return this.commandBus.execute(new SendMoneyCommand(dto.senderAccountId, dto.receiverAccountId, dto.amount, dto.msg || ""));
+    }
+
+    @Post('replay')
+    async replayAllEvents() {
+        return this.commandBus.execute(new RebuildAccountsCommand());
     }
 }

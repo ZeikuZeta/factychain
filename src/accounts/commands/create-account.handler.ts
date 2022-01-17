@@ -1,21 +1,20 @@
+import { InjectRedis } from "@liaoliaots/nestjs-redis";
 import { BadRequestException, ConflictException, Inject } from "@nestjs/common";
 import { CommandHandler, EventPublisher, ICommandHandler } from "@nestjs/cqrs";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Redis } from "ioredis";
 import { StoreEventBus } from "src/events/store-event-bus";
-import { StoreEventPublisher } from "src/events/store-event-publisher";
 import { Repository } from "typeorm";
 import { AccountCreatedEvent } from "../events/account-created.event";
 import { AccountEntity } from "../models/account.entity";
-import { Account } from "../models/account.model";
 import { CreateAccountCommand } from "./create-account.command";
 
 @CommandHandler(CreateAccountCommand)
 export class CreateAccountHandler implements ICommandHandler<CreateAccountCommand> {
     constructor(
-        private publisher: StoreEventPublisher,
         private ebus: StoreEventBus,
-        @InjectRepository(AccountEntity)
-        private repository: Repository<AccountEntity>,
+        @InjectRepository(AccountEntity) private repository: Repository<AccountEntity>,
+        @InjectRedis() private readonly redis: Redis
     ) { }
 
     async execute(command: CreateAccountCommand) {
@@ -24,6 +23,14 @@ export class CreateAccountHandler implements ICommandHandler<CreateAccountComman
         if (accountEntity !== undefined) {
             throw new ConflictException("accountId already exist");
         }
+
+        // Check reservation unique id
+        if (await this.redis.get(command.accountId)) {
+            throw new ConflictException("accountId already exist");
+        }
+
+        // Do reservation (to be deleted in account-created-event)
+        await this.redis.set(command.accountId, "");
 
         this.ebus.publish(new AccountCreatedEvent(command.accountId, command.amount));
     }

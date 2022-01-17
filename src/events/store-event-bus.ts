@@ -32,7 +32,10 @@ export class StoreEventBus<EventBase extends IEvent = IEvent>
     }
 
     async onModuleInit() {
-        this.natsConnection = await connect({ servers: "nats://localhost:4222" })
+        this.natsConnection = await connect({
+            servers: "nats://localhost:4222",
+
+        })
         this.logger.log("NATS connected");
     }
 
@@ -69,7 +72,9 @@ export class StoreEventBus<EventBase extends IEvent = IEvent>
                     this.logger.error(err.message);
                 } else {
                     const event = codec.decode(msg.data);
-                    handler.handle(event as EventBase);
+                    handler.handle(event as EventBase).then(() => {
+                        msg.respond();
+                    });
                 }
             }
         });
@@ -83,6 +88,15 @@ export class StoreEventBus<EventBase extends IEvent = IEvent>
     register(handlers: EventHandlerType<EventBase>[] = []) {
         this.logger.log("REGISTER handlers..");
         handlers.forEach((handler) => this.registerHandler(handler));
+    }
+
+    async replayAll() {
+        const codec = JSONCodec();
+        const events = await this.repository.find({ order: { created_at: "ASC" } });
+
+        for (const event of events) {
+            await this.natsConnection.request(event.name, codec.encode(event.data));
+        }
     }
 
     protected registerHandler(handler: EventHandlerType<EventBase>) {
