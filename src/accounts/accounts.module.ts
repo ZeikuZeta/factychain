@@ -16,7 +16,7 @@ export const EventHandlers = [AccountCreatedHandler, MoneySendedHandler];
 export const QueryHandlers = [GetAccountHandler, GetAccountsHandler];
 
 @Module({
-    imports: [EventsModule.forFeature(), TypeOrmModule.forFeature([AccountEntity]), CqrsModule],
+    imports: [TypeOrmModule.forFeature([AccountEntity]), CqrsModule],
     providers: [
         ...CommandHandlers,
         ...EventHandlers,
