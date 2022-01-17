@@ -34,6 +34,18 @@ $ npm install
 
 ## Running the app
 
+**dependencies**
+
+```bash
+$ docker run --name some-postgres -e POSTGRES_PASSWORD=postgres-password -p 5432:5432 -d postgres
+$ docker run -d --name nats -p 4222:4222 nats -DV
+$ docker exec -it some-postgres bash
+root $ su postgres
+postgres $ psql
+postgres= create database factychain_events;
+postgres= create database factychain_view;
+```
+
 ```bash
 # development
 $ npm run start
