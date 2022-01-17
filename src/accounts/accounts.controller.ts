@@ -26,7 +26,7 @@ export class AccountsController {
         return this.queryBus.execute(new GetAccounts());
     }
 
-    @Put(':id')
+    @Post(':id')
     async createAccount(@Param('id') id: string, @Body() dto: CreateAccountDto) {
         return this.commandBus.execute(new CreateAccountCommand(id, dto.amount));
     }
