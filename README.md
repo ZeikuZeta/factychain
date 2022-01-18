@@ -39,6 +39,7 @@ $ npm install
 ```bash
 $ docker run --name some-postgres -e POSTGRES_PASSWORD=postgres-password -p 5432:5432 -d postgres
 $ docker run -d --name nats -p 4222:4222 nats -DV
+$ docker run --name=some-redis -p 6379:6379 -d redis 
 $ docker exec -it some-postgres bash
 root $ su postgres
 postgres $ psql
