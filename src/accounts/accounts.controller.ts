@@ -26,14 +26,14 @@ export class AccountsController {
         return this.queryBus.execute(new GetAccounts());
     }
 
-    @Post(':id')
-    async createAccount(@Param('id') id: string, @Body() dto: CreateAccountDto) {
-        return this.commandBus.execute(new CreateAccountCommand(id, dto.amount));
-    }
-
     @Post('transactions')
     async createTransaction(@Body() dto: CreateTransactionDto) {
         return this.commandBus.execute(new SendMoneyCommand(dto.senderAccountId, dto.receiverAccountId, dto.amount, dto.msg || ""));
+    }
+
+    @Post(':id')
+    async createAccount(@Param('id') id: string, @Body() dto: CreateAccountDto) {
+        return this.commandBus.execute(new CreateAccountCommand(id, dto.amount));
     }
 
     @Get(':id')
