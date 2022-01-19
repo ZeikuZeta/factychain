@@ -31,6 +31,11 @@ export class AccountsController {
         return this.commandBus.execute(new CreateAccountCommand(id, dto.amount));
     }
 
+    @Post('transactions')
+    async createTransaction(@Body() dto: CreateTransactionDto) {
+        return this.commandBus.execute(new SendMoneyCommand(dto.senderAccountId, dto.receiverAccountId, dto.amount, dto.msg || ""));
+    }
+
     @Get(':id')
     async getAccount(@Param('id') id: string): Promise<AccountEntity> {
         const account: AccountEntity | undefined = await this.queryBus.execute(new GetAccount(id));
@@ -40,11 +45,6 @@ export class AccountsController {
         }
 
         return account;
-    }
-
-    @Post('transactions')
-    async createTransaction(@Body() dto: CreateTransactionDto) {
-        return this.commandBus.execute(new SendMoneyCommand(dto.senderAccountId, dto.receiverAccountId, dto.amount, dto.msg || ""));
     }
 
     @Post('replay')

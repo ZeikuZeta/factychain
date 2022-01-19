@@ -16,14 +16,21 @@ export class SendMoneyHandler implements ICommandHandler<SendMoneyCommand> {
     ) { }
 
     async execute(command: SendMoneyCommand) {
-        const accountEntity = await this.repository.findOne(command.senderAccountId);
+        try {
+            const accountEntity = await this.repository.findOne(command.senderAccountId);
 
-        if (accountEntity === undefined) {
-            throw new NotFoundException();
+            if (accountEntity === undefined) {
+                throw new NotFoundException();
+            }
+
+            const account = this.publisher.mergeObjectContext(new Account(accountEntity));
+            account.sendMoney(command.receiverAccountId, command.amount);
+            account.commit();
+        } catch (e) {
+            console.log(e);
         }
 
-        const account = this.publisher.mergeObjectContext(new Account(accountEntity));
-        account.sendMoney(command.receiverAccountId, command.amount);
-        account.commit();
+
+
     }
 }
